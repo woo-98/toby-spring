@@ -18,20 +18,42 @@ public class UserDao {
         this.dataSource = dataSource;
     }
 
-    public void add(User user) throws SQLException {
-        Connection c = this.dataSource.getConnection();
+    public void jdbcContextWithStatementStrategy(StatementStrategy stmt) throws SQLException {
+        Connection c = null;
+        PreparedStatement ps = null;
 
-        PreparedStatement ps = c.prepareStatement(
-                "insert into users(id, name, password) values(?,?,?)");
-        ps.setString(1, user.getId());
-        ps.setString(2, user.getName());
-        ps.setString(3, user.getPassword());
+        try {
+            c = dataSource.getConnection();
 
-        ps.executeUpdate();
+            ps = stmt.makePreparedStatement(c);
 
-        ps.close();
-        c.close();
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw e;
+        } finally {
+            if (ps != null) { try { ps.close(); } catch (SQLException e) {} }
+            if (c != null) { try {c.close(); } catch (SQLException e) {} }
+        }
     }
+
+
+    public void add(final User user) throws SQLException {
+        jdbcContextWithStatementStrategy(
+                new StatementStrategy() {
+                    public PreparedStatement makePreparedStatement(Connection c)
+                            throws SQLException {
+                        PreparedStatement ps =
+                                c.prepareStatement("insert into users(id, name, password) values(?,?,?)");
+                        ps.setString(1, user.getId());
+                        ps.setString(2, user.getName());
+                        ps.setString(3, user.getPassword());
+
+                        return ps;
+                    }
+                }
+        );
+    }
+
 
     public User get(String id) throws SQLException {
         Connection c = this.dataSource.getConnection();
@@ -59,67 +81,29 @@ public class UserDao {
     }
 
     public void deleteAll() throws SQLException {
-        Connection c = null;
-        PreparedStatement ps = null;
-
-        try {
-            c = dataSource.getConnection();
-            ps = c.prepareStatement("delete from users");
-            ps.executeUpdate();
-        } catch (SQLException e) {
-            throw e;
-        } finally {
-            if (ps != null) {
-                try {
-                    ps.close();
-                } catch (SQLException e) {
+        jdbcContextWithStatementStrategy(
+                new StatementStrategy() {
+                    public PreparedStatement makePreparedStatement(Connection c)
+                            throws SQLException {
+                        return c.prepareStatement("delete from users");
+                    }
                 }
-            }
-            if ( c != null) {
-                try {
-                    c.close();
-                } catch (SQLException e) {
-                }
-            }
-        }
-
+        );
     }
 
     public int getCount() throws SQLException  {
-        Connection c = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
+        Connection c = dataSource.getConnection();
 
-        try {
-            c = dataSource.getConnection();
+        PreparedStatement ps = c.prepareStatement("select count(*) from users");
 
-            ps = c.prepareStatement("select count(*) from users");
+        ResultSet rs = ps.executeQuery();
+        rs.next();
+        int count = rs.getInt(1);
 
-            rs = ps.executeQuery();
-            rs.next();
-            return rs.getInt(1);
-        } catch (SQLException e) {
-            throw e;
-        } finally {
-            if (rs != null) {
-                try {
-                    rs.close();
-                } catch (SQLException e) {
-                }
-            }
-            if (ps != null) {
-                try {
-                    ps.close();
-                } catch (SQLException e) {
-                }
-            }
-            if (c != null) {
-                try {
-                    c.close();
-                } catch (SQLException e) {
+        rs.close();
+        ps.close();
+        c.close();
 
-                }
-            }
-        }
+        return count;
     }
 }
