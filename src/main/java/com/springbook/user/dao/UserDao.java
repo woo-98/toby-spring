@@ -27,7 +27,19 @@ public class UserDao {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
     }
 
+    private RowMapper<User> userMapper = new RowMapper<User>() {
+        @Override
+        public User mapRow(ResultSet rs, int rowNum) throws SQLException {
+            User user = new User();
+            user.setId(rs.getString("id"));
+            user.setName(rs.getString("name"));
+            user.setPassword(rs.getString("password"));
+            return user;
+        }
+    };
+
     private JdbcContext jdbcContext;
+
     public void jdbcContextWithStatementStrategy(StatementStrategy stmt) throws SQLException {
         Connection c = null;
         PreparedStatement ps = null;
@@ -41,8 +53,18 @@ public class UserDao {
         } catch (SQLException e) {
             throw e;
         } finally {
-            if (ps != null) { try { ps.close(); } catch (SQLException e) {} }
-            if (c != null) { try {c.close(); } catch (SQLException e) {} }
+            if (ps != null) {
+                try {
+                    ps.close();
+                } catch (SQLException e) {
+                }
+            }
+            if (c != null) {
+                try {
+                    c.close();
+                } catch (SQLException e) {
+                }
+            }
         }
     }
 
@@ -53,21 +75,9 @@ public class UserDao {
     }
 
 
-
-
     public User get(String id) throws SQLException {
-        return this.jdbcTemplate.queryForObject("select * from users where id = ?",
-                new Object[]{id},
-                new RowMapper<User>() {
-                    @Override
-                    public User mapRow(ResultSet rs, int rowNum) throws SQLException {
-                        User user = new User();
-                        user.setId(rs.getString("id"));
-                        user.setName(rs.getString("name"));
-                        user.setPassword(rs.getString("password"));
-                        return user;
-                    }
-                });
+        return this.jdbcTemplate.queryForObject("select * from users where id =?",
+                new Object[]{id}, this.userMapper);
     }
 
     public void deleteAll() throws SQLException {
@@ -75,22 +85,11 @@ public class UserDao {
     }
 
 
-
     public int getCount() {
         return this.jdbcTemplate.queryForObject("select count(*) from users", Integer.class);
     }
 
-    public List<User> getAll () {
-        return this.jdbcTemplate.query("select * from users order by id",
-                new RowMapper<User>() {
-                    @Override
-                    public User mapRow(ResultSet rs, int rowNum) throws SQLException {
-                        User user = new User();
-                        user.setId(rs.getString("id"));
-                        user.setName(rs.getString("name"));
-                        user.setPassword(rs.getString("password"));
-                        return user;
-                    }
-                });
+    public List<User> getAll() {
+        return this.jdbcTemplate.query("select * from users order by id", this.userMapper);
     }
 }
