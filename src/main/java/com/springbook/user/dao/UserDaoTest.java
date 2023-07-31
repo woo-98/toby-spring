@@ -1,12 +1,14 @@
 package com.springbook.user.dao;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThat;
 
 import java.sql.SQLException;
 import java.util.List;
 
 import com.springbook.user.domain.Level;
+import com.springbook.user.service.UserService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,6 +29,7 @@ import javax.sql.DataSource;
 public class UserDaoTest {
     @Autowired UserDao dao;
     @Autowired DataSource dataSource;
+    @Autowired UserService userService;
     ApplicationContext context;
 
     private User user1;
@@ -130,6 +133,7 @@ public class UserDaoTest {
         dao.deleteAll();
 
         dao.add(user1);
+        dao.add(user2);
 
         user1.setName("오민규");
         user1.setPassword("springno6");
@@ -140,6 +144,8 @@ public class UserDaoTest {
 
         User user1update = dao.get(user1.getId());
         checkSameUser(user1, user1update);
+        User user2same = dao.get(user2.getId());
+        checkSameUser(user2, user2same);
     }
 
 }
