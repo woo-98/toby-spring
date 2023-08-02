@@ -21,13 +21,15 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import com.springbook.user.dao.UserDao;
 import com.springbook.user.domain.Level;
 import com.springbook.user.domain.User;
+import org.springframework.transaction.PlatformTransactionManager;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations="/test-applicationContext.xml")
 public class UserServiceTest {
+    @Autowired
+    PlatformTransactionManager transactionManager;
     @Autowired UserService userService;
     @Autowired UserDao userDao;
-    @Autowired DataSource dataSource;
 
     List<User> users;	// test fixture
 
@@ -88,7 +90,7 @@ public class UserServiceTest {
     public void upgradeAllOrNothing() throws Exception {
         UserService testUserService = new TestUserService(users.get(3).getId());
         testUserService.setUserDao(this.userDao);
-        testUserService.setDataSource(this.dataSource);
+        testUserService.setTransactionManager(transactionManager);
 
         userDao.deleteAll();
         for(User user : users) userDao.add(user);
