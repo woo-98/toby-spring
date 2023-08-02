@@ -3,7 +3,12 @@ package com.springbook.user.service;
 import com.springbook.user.dao.UserDao;
 import com.springbook.user.domain.User;
 import com.springbook.user.domain.Level;
+import org.springframework.jdbc.datasource.DataSourceUtils;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import javax.sql.DataSource;
+import javax.xml.crypto.Data;
+import java.sql.Connection;
 import java.util.List;
 
 
@@ -13,17 +18,38 @@ public class UserService {
 
     static UserDao userDao;
 
+    private DataSource dataSource;
+
+    public void setDataSource(DataSource dataSource) {
+        this.dataSource = dataSource;
+    }
+
     public void setUserDao(UserDao userDao) {
         this.userDao = userDao;
     }
 
-    public void upgradeLevels() {
-       List<User> users = userDao.getAll();
-       for(User user : users) {
-           if (canUpgradeLevel(user)) {
-               upgradeLevel(user);
-           }
-       }
+
+    public void upgradeLevels()  throws Exception {
+        TransactionSynchronizationManager.initSynchronization();
+        Connection c = DataSourceUtils.getConnection(dataSource);
+        c.setAutoCommit(false);
+
+        try {
+            List<User> users = userDao.getAll();
+            for(User user : users) {
+                if (canUpgradeLevel(user)) {
+                    upgradeLevel(user);
+                }
+            }
+            c.commit();
+        } catch (Exception e) {
+            c.rollback();
+            throw e;
+        } finally {
+            DataSourceUtils.releaseConnection(c, dataSource);
+            TransactionSynchronizationManager.unbindResource(this.dataSource);
+            TransactionSynchronizationManager.clearSynchronization();
+        }
     }
 
     private boolean canUpgradeLevel(User user) {
@@ -36,7 +62,7 @@ public class UserService {
         }
     }
 
-    private void upgradeLevel(User user) {
+    protected void upgradeLevel(User user) {
         user.upgradeLevel();
         userDao.update(user);
     }

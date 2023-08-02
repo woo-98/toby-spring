@@ -6,6 +6,7 @@ import com.springbook.user.domain.User;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.junit.runners.model.TestTimedOutException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -17,7 +18,7 @@ import java.util.Arrays;
 import static com.springbook.user.service.UserService.*;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
-
+import static org.junit.Assert.fail;
 
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -29,6 +30,23 @@ public class UserServiceTest {
     UserDao userDao;
     List<User> users;	// test fixture
     User user;
+
+    static class TestUserService extends UserService {
+        private String id;
+
+        private TestUserService(String id) {
+            this.id = id;
+        }
+
+        protected void upgradeLevel(User user) {
+            if (user.getId().equals(this.id)) throw new TestUserServiceException();
+            super.upgradeLevel(user);
+        }
+    }
+
+    static class TestUserServiceException extends RuntimeException {
+
+    }
     @Before
     public void setUp() {
         users = Arrays.asList(
@@ -72,6 +90,23 @@ public class UserServiceTest {
             user.setLevel(level);
             user.upgradeLevel();
         }
+    }
+
+    @Test
+    public void upgradeAllOrNothing() {
+        UserService testUserService = new TestUserService(users.get(3).getId());
+        testUserService.setUserDao(this.userDao);
+        userDao.deleteAll();
+        for(User user : users) userDao.add(user);
+
+        try {
+            testUserService.upgradeLevels();
+            fail("TestUserServiceException expected");
+        }
+        catch (TestUserServiceException e) {
+        }
+
+        checkLevelUpgraded(users.get(1), false);
     }
 
 }
