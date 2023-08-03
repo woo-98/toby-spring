@@ -1,62 +1,29 @@
 package com.springbook.user.domain;
 
-
 public class User {
     String id;
     String name;
     String password;
+    String email;
     Level level;
     int login;
     int recommend;
 
-    String email;
-
     public User() {
-
     }
 
-    public Level getLevel() {
-        return level;
-    }
-
-    public void setLevel(Level level) {
-        this.level = level;
-    }
-
-    public void setLogin(int login) {
-        this.login = login;
-    }
-
-    public void setRecommend(int recommend) {
-        this.recommend = recommend;
-    }
-
-    public int getLogin() { return login;
-    }
-
-    public int getRecommend() { return recommend;
-    }
-
-    public void upgradeLevel() {
-        Level nextLevel = this.level.nextLevel();
-        if (nextLevel == null) {
-            throw new IllegalStateException(this.level + "은 업그레이드가 불가능합니다");
-        }
-        else {
-            this.level = nextLevel;
-        }
-    }
-
-
-    public User(String id, String name, String password, String email, Level level, int login, int recommend) {
+    public User(String id, String name, String password, String email,
+                Level level, int login, int recommend) {
+        super();
         this.id = id;
         this.name = name;
         this.password = password;
+        this.email = email;
         this.level = level;
         this.login = login;
         this.recommend = recommend;
-        this.email = email;
     }
+
 
     public String getId() {
         return id;
@@ -77,11 +44,45 @@ public class User {
         this.password = password;
     }
 
+    public Level getLevel() {
+        return level;
+    }
+
+    public void setLevel(Level level) {
+        this.level = level;
+    }
+
+    public int getLogin() {
+        return login;
+    }
+
+    public void setLogin(int login) {
+        this.login = login;
+    }
+
+    public int getRecommend() {
+        return recommend;
+    }
+
+    public void setRecommend(int recommend) {
+        this.recommend = recommend;
+    }
+
     public String getEmail() {
         return email;
     }
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public void upgradeLevel() {
+        Level nextLevel = this.level.nextLevel();
+        if (nextLevel == null) {
+            throw new IllegalStateException(this.level + "은  업그레이드가 불가능합니다");
+        }
+        else {
+            this.level = nextLevel;
+        }
     }
 }

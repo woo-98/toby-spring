@@ -1,31 +1,30 @@
 package com.springbook.user.service;
 
-import com.mysql.cj.Session;
-import com.springbook.mail.MailSender;
-import com.springbook.user.dao.UserDao;
-import com.springbook.user.domain.Level;
-import com.springbook.user.domain.User;
+import java.util.List;
+
+import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 
-import javax.mail.internet.MimeMessage;
-import java.util.List;
-import java.util.Properties;
-
-
+import com.springbook.user.dao.UserDao;
+import com.springbook.user.domain.Level;
+import com.springbook.user.domain.User;
 
 public class UserService {
     public static final int MIN_LOGCOUNT_FOR_SILVER = 50;
-    public static final int  MIN_RECCOMEND_FOR_GOLD = 30;
+    public static final int MIN_RECCOMEND_FOR_GOLD = 30;
 
-    static UserDao userDao;
-    private PlatformTransactionManager transactionManager;
+    private UserDao userDao;
     private MailSender mailSender;
+    private PlatformTransactionManager transactionManager;
 
-    public void setMialSender(MailSender mailSender) {
+    public void setUserDao(UserDao userDao) {
+        this.userDao = userDao;
+    }
+
+    public void setMailSender(MailSender mailSender) {
         this.mailSender = mailSender;
     }
 
@@ -33,14 +32,7 @@ public class UserService {
         this.transactionManager = transactionManager;
     }
 
-
-
-    public void setUserDao(UserDao userDao) {
-        this.userDao = userDao;
-    }
-
-
-    public void upgradeLevels()  throws Exception {
+    public void upgradeLevels() {
         TransactionStatus status =
                 this.transactionManager.getTransaction(new DefaultTransactionDefinition());
         try {
@@ -59,10 +51,10 @@ public class UserService {
 
     private boolean canUpgradeLevel(User user) {
         Level currentLevel = user.getLevel();
-        switch (currentLevel) {
-            case BASIC : return (user.getLogin() >= MIN_LOGCOUNT_FOR_SILVER);
+        switch(currentLevel) {
+            case BASIC: return (user.getLogin() >= MIN_LOGCOUNT_FOR_SILVER);
             case SILVER: return (user.getRecommend() >= MIN_RECCOMEND_FOR_GOLD);
-            case GOLD:  return false;
+            case GOLD: return false;
             default: throw new IllegalArgumentException("Unknown Level: " + currentLevel);
         }
     }
@@ -74,19 +66,16 @@ public class UserService {
     }
 
     private void sendUpgradeEMail(User user) {
-        JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
-        mailSender.setHost("mail.server.com");
-
         SimpleMailMessage mailMessage = new SimpleMailMessage();
         mailMessage.setTo(user.getEmail());
-        mailMessage.setFrom("useradmim@ksug.org");
-        mailMessage.setSubject("Upgrade 안내");
-        mailMessage.setText("사용자님의 등급이 " + user.getLevel().name());
+        mailMessage.setFrom("useradmin@ksug.org");
+        mailMessage.setSubject("Upgrade ¾È³»");
+        mailMessage.setText("»ç¿ëÀÚ´ÔÀÇ µî±ÞÀÌ " + user.getLevel().name());
 
         this.mailSender.send(mailMessage);
     }
 
-    public static void add(User user) {
+    public void add(User user) {
         if (user.getLevel() == null) user.setLevel(Level.BASIC);
         userDao.add(user);
     }
