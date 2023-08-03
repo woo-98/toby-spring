@@ -38,9 +38,9 @@ public class UserDaoTest {
 
     @Before
     public void setUp()  {
-        this.user1 = new User("gyumee", "박건우", "springno1", Level.BASIC,1,0);
-        this.user2 = new User("leegw700", "김갑환", "springno2",Level.SILVER,55,10);
-        this.user3 = new User("bumjin", "김승민", "springno3",Level.GOLD,100,40);
+        this.user1 = new User("gyumee", "박건우", "springno1","user1@ksug.org", Level.BASIC,1,0);
+        this.user2 = new User("leegw700", "김갑환", "springno2","user2@ksug.org",Level.SILVER,55,10);
+        this.user3 = new User("bumjin", "김승민", "springno3","user3@ksug.org",Level.GOLD,100,40);
     }
 
     @Test
@@ -147,5 +147,7 @@ public class UserDaoTest {
         User user2same = dao.get(user2.getId());
         checkSameUser(user2, user2same);
     }
+
+
 
 }
