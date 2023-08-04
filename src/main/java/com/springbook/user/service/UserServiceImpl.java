@@ -4,9 +4,6 @@ import java.util.List;
 
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.DefaultTransactionDefinition;
 
 import com.springbook.user.dao.UserDao;
 import com.springbook.user.domain.Level;
@@ -18,7 +15,6 @@ public class UserServiceImpl implements UserService {
 
     private UserDao userDao;
     private MailSender mailSender;
-    private PlatformTransactionManager transactionManager;
 
     public void setUserDao(UserDao userDao) {
         this.userDao = userDao;
@@ -28,20 +24,7 @@ public class UserServiceImpl implements UserService {
         this.mailSender = mailSender;
     }
 
-    public void setTransactionManager(PlatformTransactionManager transactionManager) {
-        this.transactionManager = transactionManager;
-    }
-
     public void upgradeLevels() {
-       List<User> users = userDao.getAll();
-       for (User user : users) {
-           if(canUpgradeLevel(user)) {
-               upgradeLevel(user);
-           }
-       }
-    }
-
-    private void upgradeLevelsInternal() {
         List<User> users = userDao.getAll();
         for (User user : users) {
             if (canUpgradeLevel(user)) {
