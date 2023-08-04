@@ -3,8 +3,8 @@ package com.springbook.user.service;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
-import static com.springbook.user.service.UserService.MIN_LOGCOUNT_FOR_SILVER;
-import static com.springbook.user.service.UserService.MIN_RECCOMEND_FOR_GOLD;
+import static com.springbook.user.service.UserServiceImpl.MIN_LOGCOUNT_FOR_SILVER;
+import static com.springbook.user.service.UserServiceImpl.MIN_RECCOMEND_FOR_GOLD;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -29,7 +29,8 @@ import com.springbook.user.domain.User;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations="/test-applicationContext.xml")
 public class UserServiceTest {
-    @Autowired UserService userService;
+    @Autowired
+    UserServiceImpl userService;
     @Autowired UserDao userDao;
     @Autowired MailSender mailSender;
     @Autowired PlatformTransactionManager transactionManager;
@@ -115,7 +116,7 @@ public class UserServiceTest {
 
     @Test
     public void upgradeAllOrNothing() {
-        UserService testUserService = new TestUserService(users.get(3).getId());
+        UserServiceImpl testUserService = new TestUserService(users.get(3).getId());
         testUserService.setUserDao(this.userDao);
         testUserService.setTransactionManager(this.transactionManager);
         testUserService.setMailSender(this.mailSender);
@@ -134,7 +135,7 @@ public class UserServiceTest {
     }
 
 
-    static class TestUserService extends UserService {
+    static class TestUserService extends UserServiceImpl {
         private String id;
 
         private TestUserService(String id) {
