@@ -1,16 +1,8 @@
 package com.springbook.user.service;
 
-import static org.hamcrest.CoreMatchers.is;
-import static com.springbook.user.service.UserServiceImpl.MIN_LOGCOUNT_FOR_SILVER;
-import static com.springbook.user.service.UserServiceImpl.MIN_RECCOMEND_FOR_GOLD;
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
-
-import java.lang.reflect.Proxy;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
+import com.springbook.user.dao.UserDao;
+import com.springbook.user.domain.Level;
+import com.springbook.user.domain.User;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -19,14 +11,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.MailException;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.PlatformTransactionManager;
 
-import com.springbook.user.dao.UserDao;
-import com.springbook.user.domain.Level;
-import com.springbook.user.domain.User;
+import java.lang.reflect.Proxy;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import static com.springbook.user.service.UserServiceImpl.MIN_LOGCOUNT_FOR_SILVER;
+import static com.springbook.user.service.UserServiceImpl.MIN_RECCOMEND_FOR_GOLD;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations="/test-applicationContext.xml")
