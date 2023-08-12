@@ -10,8 +10,14 @@ import com.springbook.user.domain.Level;
 import com.springbook.user.domain.User;
 
 public class UserServiceImpl implements UserService {
+
     public static final int MIN_LOGCOUNT_FOR_SILVER = 50;
     public static final int MIN_RECCOMEND_FOR_GOLD = 30;
+
+    public void deleteAll() {userDao.deleteAll();}
+    public User get(String id) {return userDao.get(id);}
+    public List<User> getAll() {return userDao.getAll();}
+    public void update(User user) {userDao.update(user);}
 
     private UserDao userDao;
     private MailSender mailSender;
