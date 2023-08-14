@@ -32,26 +32,34 @@ import org.springframework.transaction.PlatformTransactionManager;
 import com.springbook.user.dao.UserDao;
 import com.springbook.user.domain.Level;
 import com.springbook.user.domain.User;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.DefaultTransactionDefinition;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations="/test-applicationContext.xml")
 public class UserServiceTest {
-    @Autowired UserService userService;
-    @Autowired UserService testUserService;
-    @Autowired UserDao userDao;
-    @Autowired MailSender mailSender;
-    @Autowired PlatformTransactionManager transactionManager;
-    @Autowired ApplicationContext context;
+    @Autowired
+    UserService userService;
+    @Autowired
+    UserService testUserService;
+    @Autowired
+    UserDao userDao;
+    @Autowired
+    MailSender mailSender;
+    @Autowired
+    PlatformTransactionManager transactionManager;
+    @Autowired
+    ApplicationContext context;
 
 
-    List<User> users;	// test fixture
+    List<User> users;    // test fixture
 
     @Before
     public void setUp() {
         users = Arrays.asList(
-                new User("bumjin", "박범진", "p1", "user1@ksug.org", Level.BASIC, MIN_LOGCOUNT_FOR_SILVER-1, 0),
+                new User("bumjin", "박범진", "p1", "user1@ksug.org", Level.BASIC, MIN_LOGCOUNT_FOR_SILVER - 1, 0),
                 new User("joytouch", "강명성", "p2", "user2@ksug.org", Level.BASIC, MIN_LOGCOUNT_FOR_SILVER, 0),
-                new User("erwins", "신승한", "p3", "user3@ksug.org", Level.SILVER, 60, MIN_RECCOMEND_FOR_GOLD-1),
+                new User("erwins", "신승한", "p3", "user3@ksug.org", Level.SILVER, 60, MIN_RECCOMEND_FOR_GOLD - 1),
                 new User("madnite1", "이상호", "p4", "user4@ksug.org", Level.SILVER, 60, MIN_RECCOMEND_FOR_GOLD),
                 new User("green", "오민규", "p5", "user5@ksug.org", Level.GOLD, 100, Integer.MAX_VALUE)
         );
@@ -105,10 +113,21 @@ public class UserServiceTest {
             updated.add(user);
         }
 
-        public void add(User user) { throw new UnsupportedOperationException(); }
-        public void deleteAll() { throw new UnsupportedOperationException(); }
-        public User get(String id) { throw new UnsupportedOperationException(); }
-        public int getCount() { throw new UnsupportedOperationException(); }
+        public void add(User user) {
+            throw new UnsupportedOperationException();
+        }
+
+        public void deleteAll() {
+            throw new UnsupportedOperationException();
+        }
+
+        public User get(String id) {
+            throw new UnsupportedOperationException();
+        }
+
+        public int getCount() {
+            throw new UnsupportedOperationException();
+        }
     }
 
     static class MockMailSender implements MailSender {
@@ -156,8 +175,7 @@ public class UserServiceTest {
         User userUpdate = userDao.get(user.getId());
         if (upgraded) {
             assertThat(userUpdate.getLevel(), is(user.getLevel().nextLevel()));
-        }
-        else {
+        } else {
             assertThat(userUpdate.getLevel(), is(user.getLevel()));
         }
     }
@@ -166,7 +184,7 @@ public class UserServiceTest {
     public void add() {
         userDao.deleteAll();
 
-        User userWithLevel = users.get(4);	  // GOLD 레벨
+        User userWithLevel = users.get(4);      // GOLD 레벨
         User userWithoutLevel = users.get(0);
         userWithoutLevel.setLevel(null);
 
@@ -179,22 +197,22 @@ public class UserServiceTest {
         assertThat(userWithLevelRead.getLevel(), is(userWithLevel.getLevel()));
         assertThat(userWithoutLevelRead.getLevel(), is(Level.BASIC));
     }
+
     @Test
     public void upgradeAllOrNothing() {
         userDao.deleteAll();
-        for(User user : users) userDao.add(user);
+        for (User user : users) userDao.add(user);
 
         try {
             testUserService.upgradeLevels();
             fail("TestUserServiceException expected");
-        }
-        catch(TestUserServiceException e) {
+        } catch (TestUserServiceException e) {
         }
 
         checkLevelUpgraded(users.get(1), false);
     }
 
-    @Test(expected=TransientDataAccessResourceException.class)
+    @Test(expected = TransientDataAccessResourceException.class)
     public void readOnlyTransactionAttribute() {
         testUserService.getAll();
     }
@@ -208,7 +226,7 @@ public class UserServiceTest {
         }
 
         public List<User> getAll() {
-            for(User user : super.getAll()) {
+            for (User user : super.getAll()) {
                 super.update(user);
             }
             return null;
@@ -220,10 +238,17 @@ public class UserServiceTest {
 
     @Test
     public void transactionSync() {
-        userService.deleteAll();
+        DefaultTransactionDefinition txDefinition = new DefaultTransactionDefinition();
+        TransactionStatus txStatus = transactionManager.getTransaction(txDefinition);
 
-        userService.add(users.get(0));
-        userService.add(users.get(1));
+        try {
+            userService.deleteAll();
+            userService.add(users.get(0));
+            userService.add(users.get(1));
+        }
+        finally {
+            transactionManager.rollback(txStatus);
+        }
+
     }
-
 }
