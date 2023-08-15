@@ -21,37 +21,21 @@
     </bean>
 
     <!-- aop -->
-    <aop:config>
-        <aop:advisor advice-ref="transactionAdvice" pointcut="bean(*Service)" />
-    </aop:config>
-
-    <tx:advice id="transactionAdvice">
-        <tx:attributes>
-            <tx:method name="get*" read-only="true"/>
-            <tx:method name="*" />
-        </tx:attributes>
-    </tx:advice>
-
-    <!--
-    <bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator" />
-
-    <bean id="transactionAdvice" class="springbook.user.service.TransactionAdvice">
-        <property name="transactionManager" ref="transactionManager" />
-    </bean>
-
-    <bean id="transactionPointcut" class="org.springframework.aop.aspectj.AspectJExpressionPointcut">
-        <property name="expression" value="execution(* *..*ServiceImpl.upgrade*(..))" />
-    </bean>
-
-    <bean id="transactionAdvisor" class="org.springframework.aop.support.DefaultPointcutAdvisor">
-        <property name="advice" ref="transactionAdvice" />
-        <property name="pointcut" ref="transactionPointcut" />
-    </bean>
-     -->
+    <tx:annotation-driven />
 
     <!--  application components -->
     <bean id="userDao" class="com.springbook.user.dao.UserDaoJdbc">
         <property name="dataSource" ref="dataSource" />
+        <property name="sqlMap">
+            <map>
+                <entry key="add" value="insert into users(id, name, password, email, level, login, recommend) values(?,?,?,?,?,?,?)" />
+                <entry key="get" value="select * from users where id = ?" />
+                <entry key="getAll" value="select * from users order by id" />
+                <entry key="deleteAll" value="delete from users" />
+                <entry key="getCount" value="select count(*) from users" />
+                <entry key="update" value="update users set name = ?, password = ?, email = ?, level = ?, login = ?, recommend = ? where id = ?"  />
+            </map>
+        </property>
     </bean>
 
     <bean id="userService" class="com.springbook.user.service.UserServiceImpl">

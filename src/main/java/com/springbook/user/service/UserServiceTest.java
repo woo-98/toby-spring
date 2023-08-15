@@ -33,6 +33,7 @@ import com.springbook.user.dao.UserDao;
 import com.springbook.user.domain.Level;
 import com.springbook.user.domain.User;
 import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -237,18 +238,10 @@ public class UserServiceTest {
     }
 
     @Test
+    @Transactional
     public void transactionSync() {
-        DefaultTransactionDefinition txDefinition = new DefaultTransactionDefinition();
-        TransactionStatus txStatus = transactionManager.getTransaction(txDefinition);
-
-        try {
-            userService.deleteAll();
-            userService.add(users.get(0));
-            userService.add(users.get(1));
-        }
-        finally {
-            transactionManager.rollback(txStatus);
-        }
-
+        userService.deleteAll();
+        userService.add(users.get(0));
+        userService.add(users.get(1));
     }
 }
