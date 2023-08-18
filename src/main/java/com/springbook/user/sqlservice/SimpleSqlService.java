@@ -2,7 +2,7 @@ package com.springbook.user.sqlservice;
 
 import java.util.Map;
 
-public class SimpleSqlService implements SqlService{
+public class SimpleSqlService implements SqlService {
     private Map<String, String> sqlMap;
 
 

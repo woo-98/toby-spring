@@ -3,16 +3,15 @@ package com.springbook.user.dao;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.Map;
 
 import javax.sql.DataSource;
 
-import com.springbook.user.sqlservice.SqlService;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 
 import com.springbook.user.domain.Level;
 import com.springbook.user.domain.User;
+import com.springbook.user.sqlservice.SqlService;
 
 public class UserDaoJdbc implements UserDao {
     public void setDataSource(DataSource dataSource) {
@@ -23,13 +22,8 @@ public class UserDaoJdbc implements UserDao {
 
     private SqlService sqlService;
 
-    private Map<String, String> sqlMap;
-
     public void setSqlService(SqlService sqlService) {
         this.sqlService = sqlService;
-    }
-    public void setSqlMap(Map<String, String> sqlMap) {
-        this.sqlMap = sqlMap;
     }
 
     private RowMapper<User> userMapper =
